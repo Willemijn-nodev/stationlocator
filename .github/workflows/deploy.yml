@@ -1,0 +1,49 @@
+name: Deploy stationlocator
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: API-key injecteren
+        env:
+          WEERLIVE_API_KEY: ${{ secrets.WEERLIVE_API_KEY }}
+        run: |
+          python3 -c "
+          import os
+          key = os.environ.get('WEERLIVE_API_KEY', '')
+          with open('index.html') as f:
+              html = f.read()
+          html = html.replace('__WEERLIVE_API_KEY__', key)
+          with open('index.html', 'w') as f:
+              f.write(html)
+          print('Key injectie klaar')
+          "
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy naar GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
