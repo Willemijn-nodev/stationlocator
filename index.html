@@ -94,10 +94,6 @@ body{font-family:system-ui,Helvetica,Arial,sans-serif;font-size:13px;color:#1a1a
       <span class="field-label">Brandlocatie</span>
       <input class="search-input" id="locInput" type="text" placeholder="bijv. Kootwijk, Deurnese Peel, Posbank…" onkeydown="if(event.key==='Enter')zoek()"/>
     </div>
-    <div class="field-wrap">
-      <span class="field-label">Weerlive API-key</span>
-      <input class="key-input" id="apiKey" type="password" placeholder="Jouw API-key" onkeydown="if(event.key==='Enter')zoek()"/>
-    </div>
     <button class="search-btn" id="searchBtn" onclick="zoek()">Analyseer ↗</button>
   </div>
 
@@ -111,7 +107,7 @@ body{font-family:system-ui,Helvetica,Arial,sans-serif;font-size:13px;color:#1a1a
 // ============================================================
 // WACHTWOORD — verander dit naar jouw eigen wachtwoord
 // ============================================================
-const APP_WACHTWOORD = 'fbannl';
+const APP_WACHTWOORD = 'brand2024';
 
 // Login / logout
 function login(){
@@ -210,7 +206,7 @@ function rhKleur(v){return v<25?'alert':v<40?'warn':'';}
 function windKleur(v){return v>8?'alert':v>5?'warn':'';}
 
 async function fetchWeer(lat,lon,key){
-  const r=await fetch(`https://weerlive.nl/api/weerlive_api_v2.php?key=${encodeURIComponent(key)}&locatie=${lat},${lon}`);
+  const r=await fetch(`https://weerlive.nl/api/weerlive_api_v2.php?key=__WEERLIVE_API_KEY__&locatie=${lat},${lon}`);
   const d=await r.json();
   return(d.liveweer&&d.liveweer[0])?d.liveweer[0]:null;
 }
@@ -265,7 +261,6 @@ function fillCard(i,s,w){
 
 async function zoek(){
   const q=document.getElementById('locInput').value.trim();
-  const key=document.getElementById('apiKey').value.trim();
   if(!q)return;
   const btn=document.getElementById('searchBtn');
   btn.textContent='…'; btn.disabled=true;
@@ -297,7 +292,7 @@ async function zoek(){
 
     for(let i=0;i<top3.length;i++){
       try{
-        const w=key?await fetchWeer(top3[i].lat,top3[i].lon,key):null;
+        const w=await fetchWeer(top3[i].lat,top3[i].lon);
         fillCard(i,top3[i],w);
       }catch(e){
         const el=document.getElementById('sc'+i);
