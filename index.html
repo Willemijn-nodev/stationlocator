@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stationlocator — vrolijkweer.nl</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,Helvetica,Arial,sans-serif;font-size:13px;color:#1a1a1a;background:#f0f0ec;min-height:100vh}
+
+/* LOGIN */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.login-card{background:#fff;border:0.5px solid #ccc;border-radius:14px;padding:36px 40px;width:100%;max-width:360px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.login-logo{font-size:12px;font-weight:600;color:#aaa;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+.login-title{font-size:22px;font-weight:500;color:#1a1a1a;margin-bottom:6px}
+.login-sub{font-size:12px;color:#999;margin-bottom:28px}
+.login-label{font-size:11px;color:#666;margin-bottom:5px;display:block}
+.login-input{width:100%;font-size:14px;font-family:inherit;border:0.5px solid #ccc;border-radius:8px;padding:10px 13px;background:#f5f5f2;color:#1a1a1a;outline:none}
+.login-input:focus{border-color:#888;background:#fff}
+.login-btn{width:100%;margin-top:14px;font-size:14px;font-family:inherit;padding:11px;border-radius:8px;border:none;background:#1a1a1a;color:#fff;cursor:pointer;font-weight:500}
+.login-btn:hover{background:#333}
+.login-err{font-size:12px;color:#993C1D;margin-top:10px;background:#FAECE7;border:0.5px solid #D85A30;border-radius:6px;padding:8px 11px;display:none}
+
+/* APP */
+.app-wrap{max-width:1060px;margin:0 auto;padding:20px 16px;display:none}
+.topbar{display:flex;justify-content:space-between;align-items:center;background:#fff;border:0.5px solid #ccc;border-radius:10px;padding:11px 16px;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.topbar-left{}
+.topbar-title{font-size:14px;font-weight:600}
+.topbar-sub{font-size:11px;color:#888;margin-top:2px}
+.logout-btn{font-size:11px;font-family:inherit;padding:5px 13px;border-radius:7px;border:0.5px solid #ccc;background:#f5f5f2;color:#666;cursor:pointer}
+.logout-btn:hover{background:#e8e8e4;color:#1a1a1a}
+
+.search-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:flex-end}
+.field-wrap{display:flex;flex-direction:column;gap:4px}
+.field-label{font-size:11px;color:#666}
+.search-input{font-size:13px;font-family:inherit;border:0.5px solid #ccc;border-radius:8px;padding:8px 12px;background:#f5f5f2;color:#1a1a1a;outline:none;width:320px}
+.search-input:focus{border-color:#888;background:#fff}
+.key-input{font-size:13px;font-family:inherit;border:0.5px solid #ccc;border-radius:8px;padding:8px 12px;background:#f5f5f2;color:#1a1a1a;outline:none;width:210px}
+.key-input:focus{border-color:#888;background:#fff}
+.search-btn{font-size:13px;font-family:inherit;padding:8px 20px;border-radius:8px;border:none;background:#1a1a1a;color:#fff;cursor:pointer;align-self:flex-end;white-space:nowrap}
+.search-btn:hover{background:#333}
+.search-btn:disabled{background:#999;cursor:default}
+
+#map{width:100%;height:400px;border-radius:10px;border:0.5px solid #ccc;overflow:hidden;margin-bottom:14px}
+
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.scard{background:#fff;border:0.5px solid #ccc;border-radius:10px;padding:13px 15px}
+.scard-meta{font-size:10px;color:#aaa;margin-bottom:2px}
+.scard-name{font-size:15px;font-weight:500;color:#1a1a1a;margin-bottom:3px}
+.scard-dist{font-size:12px;color:#999;margin-bottom:11px}
+.param-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.param{background:#f5f5f2;border-radius:7px;padding:8px 10px}
+.param-full{grid-column:1/-1}
+.param-label{font-size:10px;color:#999;margin-bottom:2px}
+.param-val{font-size:16px;font-weight:500;color:#1a1a1a}
+.param-val.warn{color:#854F0B}
+.param-val.alert{color:#993C1D}
+.param-sub{font-size:11px;color:#999;margin-top:1px}
+.tag-warn{display:inline-block;margin-top:8px;font-size:10px;padding:3px 9px;border-radius:20px;background:#FAECE7;color:#993C1D;border:0.5px solid #D85A30}
+.scard-msg{font-size:12px;color:#aaa;margin-top:6px}
+.scard-err{font-size:12px;color:#993C1D;margin-top:6px;background:#FAECE7;border-radius:5px;padding:5px 8px}
+
+.footer{font-size:11px;color:#bbb;text-align:center;padding-bottom:20px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-logo">vrolijkweer.nl</div>
+    <div class="login-title">Stationlocator</div>
+    <div class="login-sub">Dichtstbijzijnde KNMI-stations bij een brandlocatie</div>
+    <label class="login-label" for="pwInput">Wachtwoord</label>
+    <input class="login-input" type="password" id="pwInput" autofocus autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"/>
+    <button class="login-btn" onclick="login()">Inloggen</button>
+    <div class="login-err" id="loginErr">Onjuist wachtwoord. Probeer opnieuw.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-wrap" id="appWrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Stationlocator — dichtstbijzijnde KNMI-stations</div>
+      <div class="topbar-sub">Voer een brandlocatie in Nederland in voor actuele meteodata van de drie dichtstbijzijnde stations</div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Uitloggen</button>
+  </div>
+
+  <div class="search-row">
+    <div class="field-wrap">
+      <span class="field-label">Brandlocatie</span>
+      <input class="search-input" id="locInput" type="text" placeholder="bijv. Kootwijk, Deurnese Peel, Posbank…" onkeydown="if(event.key==='Enter')zoek()"/>
+    </div>
+    <div class="field-wrap">
+      <span class="field-label">Weerlive API-key</span>
+      <input class="key-input" id="apiKey" type="password" placeholder="Jouw API-key" onkeydown="if(event.key==='Enter')zoek()"/>
+    </div>
+    <button class="search-btn" id="searchBtn" onclick="zoek()">Analyseer ↗</button>
+  </div>
+
+  <div id="map"></div>
+  <div class="cards" id="cards" style="display:none"></div>
+  <div class="footer">Stations: KNMI automatisch meetnet &nbsp;·&nbsp; Geocoding: Nominatim / OpenStreetMap &nbsp;·&nbsp; Weerdata: Weerlive.nl &nbsp;·&nbsp; Afstand: Haversine-formule</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// ============================================================
+// WACHTWOORD — verander dit naar jouw eigen wachtwoord
+// ============================================================
+const APP_WACHTWOORD = 'brand2024';
+
+// Login / logout
+function login(){
+  const pw = document.getElementById('pwInput').value;
+  if(pw === APP_WACHTWOORD){
+    sessionStorage.setItem('sl_auth','1');
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('appWrap').style.display='block';
+    initMap();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').focus();
+  }
+}
+function logout(){
+  sessionStorage.removeItem('sl_auth');
+  document.getElementById('appWrap').style.display='none';
+  document.getElementById('loginWrap').style.display='flex';
+  document.getElementById('pwInput').value='';
+  document.getElementById('pwInput').focus();
+}
+
+// Auto-herstel sessie
+if(sessionStorage.getItem('sl_auth')==='1'){
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('appWrap').style.display='block';
+}
+
+// KNMI stations
+const STATIONS=[
+  {nr:210,naam:"Valkenburg",lat:52.171,lon:4.419},
+  {nr:215,naam:"Voorschoten",lat:52.125,lon:4.432},
+  {nr:225,naam:"IJmuiden",lat:52.463,lon:4.555},
+  {nr:235,naam:"De Kooy",lat:52.924,lon:4.785},
+  {nr:240,naam:"Schiphol",lat:52.318,lon:4.790},
+  {nr:242,naam:"Vlieland",lat:53.242,lon:4.921},
+  {nr:249,naam:"Berkhout",lat:52.644,lon:4.979},
+  {nr:251,naam:"Hoorn (Terschelling)",lat:53.392,lon:5.346},
+  {nr:257,naam:"Wijk aan Zee",lat:52.502,lon:4.603},
+  {nr:260,naam:"De Bilt",lat:52.101,lon:5.177},
+  {nr:265,naam:"Soesterberg",lat:52.127,lon:5.276},
+  {nr:267,naam:"Stavoren",lat:52.890,lon:5.385},
+  {nr:269,naam:"Lelystad",lat:52.458,lon:5.520},
+  {nr:270,naam:"Leeuwarden",lat:53.224,lon:5.752},
+  {nr:273,naam:"Marknesse",lat:52.703,lon:5.888},
+  {nr:275,naam:"Deelen",lat:52.057,lon:5.873},
+  {nr:277,naam:"Lauwersoog",lat:53.413,lon:6.200},
+  {nr:278,naam:"Heino",lat:52.432,lon:6.261},
+  {nr:279,naam:"Hoogeveen",lat:52.728,lon:6.574},
+  {nr:280,naam:"Eelde",lat:53.125,lon:6.585},
+  {nr:283,naam:"Hupsel",lat:52.069,lon:6.657},
+  {nr:285,naam:"Huibertgat",lat:53.570,lon:6.403},
+  {nr:286,naam:"Nieuw Beerta",lat:53.196,lon:7.150},
+  {nr:290,naam:"Twenthe",lat:52.274,lon:6.897},
+  {nr:310,naam:"Vlissingen",lat:51.442,lon:3.596},
+  {nr:319,naam:"Westdorpe",lat:51.229,lon:3.862},
+  {nr:323,naam:"Wilhelminadorp",lat:51.527,lon:3.884},
+  {nr:330,naam:"Hoek van Holland",lat:51.992,lon:4.122},
+  {nr:340,naam:"Woensdrecht",lat:51.449,lon:4.342},
+  {nr:343,naam:"Rotterdam Geulhaven",lat:51.887,lon:4.316},
+  {nr:344,naam:"Rotterdam",lat:51.962,lon:4.447},
+  {nr:348,naam:"Cabauw",lat:51.971,lon:4.926},
+  {nr:356,naam:"Herwijnen",lat:51.858,lon:5.137},
+  {nr:370,naam:"Eindhoven",lat:51.451,lon:5.419},
+  {nr:375,naam:"Volkel",lat:51.657,lon:5.707},
+  {nr:377,naam:"Ell",lat:51.198,lon:5.763},
+  {nr:380,naam:"Maastricht",lat:50.906,lon:5.762},
+  {nr:391,naam:"Arcen",lat:51.498,lon:6.194}
+];
+
+function haversine(la1,lo1,la2,lo2){
+  const R=6371,r=Math.PI/180;
+  const dlat=(la2-la1)*r,dlon=(lo2-lo1)*r;
+  const a=Math.sin(dlat/2)**2+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dlon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+let map=null, stMarkers=[], pinMarker=null, lineMarkers=[];
+
+function initMap(){
+  if(map) return;
+  map=L.map('map').setView([52.25,5.3],8);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:18}).addTo(map);
+  STATIONS.forEach(s=>{
+    const m=L.circleMarker([s.lat,s.lon],{radius:5,color:'#185FA5',fillColor:'#85B7EB',fillOpacity:0.9,weight:1.5})
+      .addTo(map).bindPopup(`<b>${s.nr} · ${s.naam}</b><br>${s.lat.toFixed(3)}°N, ${s.lon.toFixed(3)}°E`);
+    stMarkers.push({s,m});
+  });
+}
+
+// Herstel kaart als sessie al actief was bij laden
+if(sessionStorage.getItem('sl_auth')==='1') window.addEventListener('load', initMap);
+
+function rhKleur(v){return v<25?'alert':v<40?'warn':'';}
+function windKleur(v){return v>8?'alert':v>5?'warn':'';}
+
+async function fetchWeer(lat,lon,key){
+  const r=await fetch(`https://weerlive.nl/api/weerlive_api_v2.php?key=${encodeURIComponent(key)}&locatie=${lat},${lon}`);
+  const d=await r.json();
+  return(d.liveweer&&d.liveweer[0])?d.liveweer[0]:null;
+}
+
+function renderSkeleton(top3,locNaam){
+  const c=document.getElementById('cards');
+  c.style.display='grid';
+  c.innerHTML=top3.map((s,i)=>`
+    <div class="scard" id="sc${i}">
+      <div class="scard-meta">#${i+1} · station ${s.nr}</div>
+      <div class="scard-name">${s.naam}</div>
+      <div class="scard-dist">${s.afstand.toFixed(1)} km</div>
+      <div class="scard-msg">Weerdata laden…</div>
+    </div>`).join('');
+}
+
+function fillCard(i,s,w){
+  const el=document.getElementById('sc'+i);
+  if(!w){el.innerHTML+=`<div class="scard-err">Geen data ontvangen van Weerlive.</div>`;return;}
+  const rv=parseFloat(w.lv),ms=parseFloat(w.windms),temp=parseFloat(w.temp),tmax=parseFloat(w.d0tmax),neersl=parseFloat(w.neersl)||0;
+  const kmh=parseFloat(w.windkmh);
+  el.innerHTML=`
+    <div class="scard-meta">#${i+1} · station ${s.nr}</div>
+    <div class="scard-name">${s.naam}</div>
+    <div class="scard-dist">${s.afstand.toFixed(1)} km &nbsp;·&nbsp; ${w.tijd||'actueel'}</div>
+    <div class="param-grid">
+      <div class="param">
+        <div class="param-label">Temperatuur nu</div>
+        <div class="param-val">${isNaN(temp)?'—':temp.toFixed(1)} °C</div>
+      </div>
+      <div class="param">
+        <div class="param-label">Tmax vandaag</div>
+        <div class="param-val">${isNaN(tmax)?'—':tmax.toFixed(1)} °C</div>
+      </div>
+      <div class="param">
+        <div class="param-label">Rel. vochtigheid</div>
+        <div class="param-val ${rhKleur(rv)}">${isNaN(rv)?'—':Math.round(rv)} %</div>
+      </div>
+      <div class="param">
+        <div class="param-label">Neerslag</div>
+        <div class="param-val">${isNaN(neersl)?'—':neersl.toFixed(1)} mm</div>
+      </div>
+      <div class="param param-full">
+        <div class="param-label">Wind</div>
+        <div class="param-val ${windKleur(ms)}">${isNaN(ms)?'—':ms.toFixed(1)} m/s &nbsp;<span style="font-size:13px;font-weight:400;color:#999">${w.windr||''}</span></div>
+        ${!isNaN(kmh)?`<div class="param-sub">${kmh.toFixed(0)} km/u</div>`:''}
+      </div>
+      ${w.samenv?`<div class="param param-full"><div class="param-label">Samenvatting</div><div style="font-size:12px;color:#555;margin-top:2px">${w.samenv}</div></div>`:''}
+    </div>
+    ${(rv<25||ms>8)?`<div class="tag-warn">⚠ brandgevaar-indicatoren aanwezig</div>`:''}`;
+}
+
+async function zoek(){
+  const q=document.getElementById('locInput').value.trim();
+  const key=document.getElementById('apiKey').value.trim();
+  if(!q)return;
+  const btn=document.getElementById('searchBtn');
+  btn.textContent='…'; btn.disabled=true;
+  try{
+    const geo=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+', Nederland')}&format=json&limit=1&countrycodes=nl`,{headers:{'Accept-Language':'nl'}});
+    const gd=await geo.json();
+    if(!gd.length){alert('Locatie niet gevonden — probeer een andere schrijfwijze.');btn.textContent='Analyseer ↗';btn.disabled=false;return;}
+    const loc={lat:parseFloat(gd[0].lat),lon:parseFloat(gd[0].lon),naam:gd[0].display_name.split(',')[0]};
+
+    if(pinMarker) map.removeLayer(pinMarker);
+    lineMarkers.forEach(m=>map.removeLayer(m)); lineMarkers=[];
+    stMarkers.forEach(({m})=>m.setStyle({color:'#185FA5',fillColor:'#85B7EB',radius:5,weight:1.5}));
+
+    pinMarker=L.marker([loc.lat,loc.lon],{
+      icon:L.divIcon({className:'',html:`<div style="width:16px;height:16px;border-radius:50%;background:#D85A30;border:2.5px solid #fff;box-shadow:0 0 0 1.5px #D85A30"></div>`,iconAnchor:[8,8]})
+    }).addTo(map).bindPopup(`<b>${loc.naam}</b><br>Brandlocatie`).openPopup();
+
+    const top3=STATIONS.map(s=>({...s,afstand:haversine(loc.lat,loc.lon,s.lat,s.lon)}))
+      .sort((a,b)=>a.afstand-b.afstand).slice(0,3);
+
+    top3.forEach(s=>{
+      const sm=stMarkers.find(x=>x.s.nr===s.nr);
+      if(sm) sm.m.setStyle({color:'#3B6D11',fillColor:'#97C459',radius:9,weight:2.5});
+      lineMarkers.push(L.polyline([[loc.lat,loc.lon],[s.lat,s.lon]],{color:'#639922',weight:1.5,dashArray:'5 4'}).addTo(map));
+    });
+
+    map.fitBounds(L.latLngBounds([[loc.lat,loc.lon],...top3.map(s=>[s.lat,s.lon])]),{padding:[50,50]});
+    renderSkeleton(top3,loc.naam);
+
+    for(let i=0;i<top3.length;i++){
+      try{
+        const w=key?await fetchWeer(top3[i].lat,top3[i].lon,key):null;
+        fillCard(i,top3[i],w);
+      }catch(e){
+        const el=document.getElementById('sc'+i);
+        if(el) el.innerHTML+=`<div class="scard-err">Datafout: ${e.message}</div>`;
+      }
+    }
+  }catch(e){alert('Fout: '+e.message);}
+  btn.textContent='Analyseer ↗'; btn.disabled=false;
+}
+</script>
+</body>
+</html>
