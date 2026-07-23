@@ -107,7 +107,7 @@ body{font-family:system-ui,Helvetica,Arial,sans-serif;font-size:13px;color:#1a1a
 // ============================================================
 // WACHTWOORD — verander dit naar jouw eigen wachtwoord
 // ============================================================
-const APP_WACHTWOORD = 'fbannl';
+const APP_WACHTWOORD = 'brand2024';
 
 // Login / logout
 function login(){
@@ -139,44 +139,48 @@ if(sessionStorage.getItem('sl_auth')==='1'){
 
 // KNMI stations
 const STATIONS=[
-  {nr:210,naam:"Valkenburg",lat:52.171,lon:4.419},
-  {nr:215,naam:"Voorschoten",lat:52.125,lon:4.432},
-  {nr:225,naam:"IJmuiden",lat:52.463,lon:4.555},
-  {nr:235,naam:"De Kooy",lat:52.924,lon:4.785},
-  {nr:240,naam:"Schiphol",lat:52.318,lon:4.790},
+  // Noord
   {nr:242,naam:"Vlieland",lat:53.242,lon:4.921},
-  {nr:249,naam:"Berkhout",lat:52.644,lon:4.979},
-  {nr:251,naam:"Hoorn (Terschelling)",lat:53.392,lon:5.346},
-  {nr:257,naam:"Wijk aan Zee",lat:52.502,lon:4.603},
-  {nr:260,naam:"De Bilt",lat:52.101,lon:5.177},
-  {nr:265,naam:"Soesterberg",lat:52.127,lon:5.276},
-  {nr:267,naam:"Stavoren",lat:52.890,lon:5.385},
-  {nr:269,naam:"Lelystad",lat:52.458,lon:5.520},
-  {nr:270,naam:"Leeuwarden",lat:53.224,lon:5.752},
-  {nr:273,naam:"Marknesse",lat:52.703,lon:5.888},
-  {nr:275,naam:"Deelen",lat:52.057,lon:5.873},
+  {nr:251,naam:"Terschelling",lat:53.392,lon:5.346},
   {nr:277,naam:"Lauwersoog",lat:53.413,lon:6.200},
-  {nr:278,naam:"Heino",lat:52.432,lon:6.261},
-  {nr:279,naam:"Hoogeveen",lat:52.728,lon:6.574},
-  {nr:280,naam:"Eelde",lat:53.125,lon:6.585},
-  {nr:283,naam:"Hupsel",lat:52.069,lon:6.657},
   {nr:285,naam:"Huibertgat",lat:53.570,lon:6.403},
   {nr:286,naam:"Nieuw Beerta",lat:53.196,lon:7.150},
+  {nr:270,naam:"Leeuwarden",lat:53.224,lon:5.752},
+  {nr:280,naam:"Eelde",lat:53.125,lon:6.585},
+  // Noord-Holland / kust
+  {nr:225,naam:"IJmuiden",lat:52.463,lon:4.555},
+  {nr:235,naam:"Den Helder",lat:52.924,lon:4.785},
+  {nr:240,naam:"Schiphol",lat:52.318,lon:4.790},
+  {nr:249,naam:"Berkhout",lat:52.644,lon:4.979},
+  {nr:257,naam:"Wijk aan Zee",lat:52.502,lon:4.603},
+  // West / Midden
+  {nr:215,naam:"Voorschoten",lat:52.125,lon:4.432},
+  {nr:260,naam:"De Bilt",lat:52.101,lon:5.177},
+  {nr:267,naam:"Stavoren",lat:52.890,lon:5.385},
+  {nr:269,naam:"Lelystad",lat:52.458,lon:5.520},
+  {nr:273,naam:"Marknesse",lat:52.703,lon:5.888},
+  {nr:330,naam:"Hoek van Holland",lat:51.992,lon:4.122},
+  {nr:344,naam:"Rotterdam",lat:51.962,lon:4.447},
+  {nr:348,naam:"Cabauw",lat:51.971,lon:4.926},
+  // Oost
+  {nr:275,naam:"Deelen",lat:52.057,lon:5.873},
+  {nr:278,naam:"Heino",lat:52.432,lon:6.261},
+  {nr:279,naam:"Hoogeveen",lat:52.728,lon:6.574},
+  {nr:283,naam:"Hupsel",lat:52.069,lon:6.657},
   {nr:290,naam:"Twenthe",lat:52.274,lon:6.897},
+  {nr:356,naam:"Herwijnen",lat:51.858,lon:5.137},
+  // Zeeland / Zuid-Holland
   {nr:310,naam:"Vlissingen",lat:51.442,lon:3.596},
   {nr:319,naam:"Westdorpe",lat:51.229,lon:3.862},
   {nr:323,naam:"Wilhelminadorp",lat:51.527,lon:3.884},
-  {nr:330,naam:"Hoek van Holland",lat:51.992,lon:4.122},
+  // Noord-Brabant / Limburg
   {nr:340,naam:"Woensdrecht",lat:51.449,lon:4.342},
-  {nr:343,naam:"Rotterdam Geulhaven",lat:51.887,lon:4.316},
-  {nr:344,naam:"Rotterdam",lat:51.962,lon:4.447},
-  {nr:348,naam:"Cabauw",lat:51.971,lon:4.926},
-  {nr:356,naam:"Herwijnen",lat:51.858,lon:5.137},
+  {nr:350,naam:"Gilze Rijen",lat:51.567,lon:4.933},
   {nr:370,naam:"Eindhoven",lat:51.451,lon:5.419},
   {nr:375,naam:"Volkel",lat:51.657,lon:5.707},
   {nr:377,naam:"Ell",lat:51.198,lon:5.763},
-  {nr:380,naam:"Maastricht",lat:50.906,lon:5.762},
-  {nr:391,naam:"Arcen",lat:51.498,lon:6.194}
+  {nr:380,naam:"Maastricht-Aachen Airport",lat:50.906,lon:5.762},
+  {nr:999,naam:"Horst",lat:51.452,lon:6.063}
 ];
 
 function haversine(la1,lo1,la2,lo2){
