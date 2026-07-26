@@ -242,10 +242,7 @@ function fillCard(i,s,w){
         <div class="param-label">Temperatuur nu</div>
         <div class="param-val">${isNaN(temp)?'—':temp.toFixed(1)} °C</div>
       </div>
-      <div class="param">
-        <div class="param-label">Tmax vandaag</div>
-        <div class="param-val">${isNaN(tmax)?'—':tmax.toFixed(1)} °C</div>
-      </div>
+
       <div class="param">
         <div class="param-label">Rel. vochtigheid</div>
         <div class="param-val ${rhKleur(rv)}">${isNaN(rv)?'—':Math.round(rv)} %</div>
