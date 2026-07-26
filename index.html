@@ -198,7 +198,7 @@ function initMap(){
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:18}).addTo(map);
   STATIONS.forEach(s=>{
     const m=L.circleMarker([s.lat,s.lon],{radius:5,color:'#185FA5',fillColor:'#85B7EB',fillOpacity:0.9,weight:1.5})
-      .addTo(map).bindPopup(`<b>${s.nr} · ${s.naam}</b><br>${s.lat.toFixed(3)}°N, ${s.lon.toFixed(3)}°E`);
+      .addTo(map).bindTooltip(`<b>${s.nr} · ${s.naam}</b><br>${s.lat.toFixed(3)}°N, ${s.lon.toFixed(3)}°E`);
     stMarkers.push({s,m});
   });
 }
